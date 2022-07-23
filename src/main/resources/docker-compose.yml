@@ -1,0 +1,72 @@
+version: '3.7'
+services:
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - zookeeper-1
+      - kafka-1
+      - kafka-2
+
+  zookeeper-1:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SERVER_ID: 1
+#      ZOOKEEPER_SERVER_1: zookeeper-1:2888:3888
+    ports:
+      - "22181:2181"
+
+  #  zookeeper-2:
+  #    image: confluentinc/cp-zookeeper:latest
+  #    environment:
+  #      ZOOKEEPER_CLIENT_PORT: 2181
+  #      ZOOKEEPER_TICK_TIME: 2000
+  #      ZOOKEEPER_SERVER_ID: 2
+  #      ZOOKEEPER_SERVER_2: zookeeper-2:2888:3888
+  #    ports:
+  #      - "32181:2181"
+
+  kafka-1:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper-1
+    ports:
+      - "29092:29092"
+      - "7071:7071"
+    volumes:
+      - ./jmx_prometheus_javaagent-0.15.0.jar:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar
+      - ./kafka.yml:/etc/jmx-exporter/kafka.yml
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      JMX_PORT: 9999
+      KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar=7071:/etc/jmx-exporter/kafka.yml"
+#  kafka-2:
+#    image: confluentinc/cp-kafka:latest
+#    depends_on:
+#      - zookeeper-1
+#    ports:
+#      - "39092:39092"
+#      - "7072:7072"
+#    volumes:
+#      - ./jmx_prometheus_javaagent-0.15.0.jar:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar
+#      - ./kafka.yml:/etc/jmx-exporter/kafka.yml
+#    environment:
+#      KAFKA_BROKER_ID: 2
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,PLAINTEXT_HOST://localhost:39092
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#      JMX_PORT: 9998
+#      KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar=7072:/etc/jmx-exporter/kafka.yml"
