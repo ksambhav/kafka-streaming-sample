@@ -31,6 +31,7 @@ public class KafkaTests {
                 Future<RecordMetadata> send = producer.send(new ProducerRecord<>("test-topic", "test", "test"));
                 RecordMetadata metadata = send.get();
                 log.info("Sent record {},{},{}", metadata.offset(), (metadata.partition()), metadata.topic());
+//                Thread.sleep(500);
             }
         } catch (ExecutionException | InterruptedException e) {
             log.error("Error while sending", e);
