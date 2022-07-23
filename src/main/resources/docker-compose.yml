@@ -1,5 +1,13 @@
 version: '3.7'
 services:
+  grafana:
+    image: grafana/grafana-oss
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
   prometheus:
     image: prom/prometheus
     ports:
@@ -34,3 +42,43 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       JMX_PORT: 9999
       KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar=7071:/etc/jmx-exporter/kafka.yml"
+  kafka-2:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper-1
+    ports:
+      - "29093:29093"
+      - "7072:7072"
+    volumes:
+      - ./jmx_prometheus_javaagent-0.15.0.jar:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar
+      - ./kafka.yml:/etc/jmx-exporter/kafka.yml
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9093,PLAINTEXT_HOST://localhost:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      JMX_PORT: 9998
+      KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar=7072:/etc/jmx-exporter/kafka.yml"
+  kafka-3:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper-1
+    ports:
+      - "29094:29094"
+      - "7073:7073"
+    volumes:
+      - ./jmx_prometheus_javaagent-0.15.0.jar:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar
+      - ./kafka.yml:/etc/jmx-exporter/kafka.yml
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9094,PLAINTEXT_HOST://localhost:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      JMX_PORT: 9997
+      KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar=7073:/etc/jmx-exporter/kafka.yml"
