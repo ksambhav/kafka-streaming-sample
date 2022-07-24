@@ -55,6 +55,7 @@ scrape_configs:
           - "kafka-1:7071"
           - "kafka-2:7072"
           - "kafka-3:7073"
+          - "kafka-4:7074"
         labels:
           env: "dev"
     relabel_configs:
@@ -64,17 +65,17 @@ scrape_configs:
         replacement: '${1}'
 
 
-#  - job_name: "schema-registry"
-#    static_configs:
-#      - targets:
-#          - "schemaregistry:1234"
-#        labels:
-#          env: "dev"
-#    relabel_configs:
-#      - source_labels: [__address__]
-#        target_label: hostname
-#        regex: '([^:]+)(:[0-9]+)?'
-#        replacement: '${1}'
+  - job_name: "schema-registry"
+    static_configs:
+      - targets:
+          - "schemaregistry:1234"
+        labels:
+          env: "dev"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
 
 
 #  - job_name: "kafka-connect"

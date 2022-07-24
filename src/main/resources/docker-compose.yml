@@ -85,18 +85,39 @@ services:
       JMX_PORT: 9997
       KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar=7073:/etc/jmx-exporter/kafka.yml"
       KAFKA_LOG4J_LOGGERS: "kafka.controller=WARN,kafka.request:logger=WARN,BrokerToControllerChannelManager:WARN,Controller:WARN"
-#  kafka-ui:
-#    container_name: kafka-ui
-#    image: provectuslabs/kafka-ui:latest
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - zookeeper-1
-#      - kafka-1
-#      - kafka-2
-#      - kafka-3
-#    environment:
-#      KAFKA_CLUSTERS_0_NAME: local
-#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:29092
-#      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
-#      KAFKA_CLUSTERS_0_JMXPORT: 9996
+  kafka-4:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper-1
+    ports:
+      - "29095:29095"
+      - "7074:7074"
+    volumes:
+      - ./jmx_prometheus_javaagent-0.15.0.jar:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar
+      - ./kafka.yml:/etc/jmx-exporter/kafka.yml
+    environment:
+      KAFKA_BROKER_ID: 4
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-4:9095,PLAINTEXT_HOST://localhost:29095
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      JMX_PORT: 9998
+      KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.15.0.jar=7074:/etc/jmx-exporter/kafka.yml"
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=WARN,kafka.request:logger=WARN,BrokerToControllerChannelManager:WARN,Controller:WARN"
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zookeeper-1
+      - kafka-1
+      - kafka-2
+      - kafka-3
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
+      KAFKA_CLUSTERS_0_JMXPORT: 9996
