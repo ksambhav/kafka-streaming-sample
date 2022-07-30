@@ -1,0 +1,16 @@
+<Configuration status="warn" debug="false">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout disableAnsi="false"
+                           pattern="%highlight{%d{HH:mm:ss} %-5level %logger{4}:%L - %msg%n%throwable{20}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=CYAN, DEBUG=green bold, TRACE=blue}"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.samsoft" level="DEBUG" additivity="false">
+            <appender-ref ref="console"/>
+        </Logger>
+        <Root level="info" additivity="false">
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>
